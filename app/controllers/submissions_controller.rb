@@ -1,10 +1,14 @@
 class SubmissionsController < ApplicationController
   before_action :set_submission, only: [:show, :edit, :update, :destroy]
+  before_action :new_submission, only: [:new, :index, :create]
+  before_action :all_submissions, only: [:new, :index, :create]
+
+  after_action :all_submissions, only: [ :create ]
+  after_action :new_submission, only: [ :create ]
 
   # GET /submissions
   # GET /submissions.json
   def index
-    @submissions = Submission.all
   end
 
   # GET /submissions/1
@@ -14,7 +18,6 @@ class SubmissionsController < ApplicationController
 
   # GET /submissions/new
   def new
-    @submission = Submission.new
   end
 
   # GET /submissions/1/edit
@@ -29,9 +32,11 @@ class SubmissionsController < ApplicationController
     respond_to do |format|
       if @submission.save
         format.html { redirect_to @submission, notice: 'Submission was successfully created.' }
+        format.js { }
         format.json { render :show, status: :created, location: @submission }
       else
         format.html { render :new }
+        format.js { }
         format.json { render json: @submission.errors, status: :unprocessable_entity }
       end
     end
@@ -70,5 +75,13 @@ class SubmissionsController < ApplicationController
     # Never trust parameters from the scary internet, only allow the white list through.
     def submission_params
       params.require(:submission).permit(:word)
+    end
+
+    def new_submission
+      @new_submission = @submission = Submission.new
+    end
+
+    def all_submissions
+      @submissions = Submission.all
     end
 end
