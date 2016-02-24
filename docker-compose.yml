@@ -1,0 +1,23 @@
+site1:
+  build: .
+  links:
+    - site2
+  volumes:
+    - .:/home/app/test_cors_2
+    - ./sqlitedb1:/home/app/test_cors_2/sqlitedb
+    - ./test_cors_2-bundle:/home/app/bundle
+  ports:
+    - '8000:80'
+  env_file:
+    - .env
+
+site2:
+  build: .
+  volumes:
+    - .:/home/app/test_cors_2
+    - ./sqlitedb2:/home/app/test_cors_2/sqlitedb
+    - ./test_cors_2-bundle:/home/app/bundle
+  ports:
+    - '8001:80'
+  env_file:
+    - .env
