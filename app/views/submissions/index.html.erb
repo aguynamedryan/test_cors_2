@@ -1,6 +1,10 @@
+<% if request.env["SERVER_PORT"].to_i != 8000 -%>
+
+<!-- We ontly want to render this section when we're dealing with the remote server -->
+
 <p id="notice"><%= notice %></p>
 
-<h1>Submissions</h1>
+<h1>Port <%=h request.env["SERVER_PORT"] %> Submissions: <%= request.xhr?.inspect %></h1>
 
 <div id="submissions">
   <%= render 'index' %>
@@ -13,3 +17,40 @@
 </div>
 
 <hr>
+<% end %>
+
+<% if request.env["SERVER_PORT"].to_i == 8000 -%>
+<!-- And we only want to render this section when we visit the first server -->
+  <div id="remote_form" />
+  <script type="text/javascript" charset="utf-8">
+    $(document).on('page:change', function() {
+      $.ajaxPrefilter( function( options, originalOptions, jqXHR ) {
+        // This will catch any AJAX request and attempt to make it use CORS
+        // However, setting crossDomain to true causes the X-Requested-With
+        // header to be dropped, meaning that Rails sets request.xhr? to false
+        // which isn't what I want.
+        options.crossDomain = true;
+        options.headers = {'X-Requested-With': 'XMLHttpRequest'};
+
+        // We want to pass "credentials" which really means the session cookie
+        options.xhrFields = {
+          withCredentials: true
+        };
+      });
+
+      // This just fetches the list and form from the remote server
+      $.ajax({
+        url: 'http://site2.127.0.0.1.xip.io/submissions',
+        type: 'GET',
+        dataType: 'html',
+        success: function(data) {
+          $('#remote_form').append(data);
+        },
+        error: function(xhr, message) {
+          console.log(xhr);
+          console.log(message);
+        }
+      });
+    });
+  </script>
+<% end %>

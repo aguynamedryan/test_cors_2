@@ -1,4 +1,10 @@
 class SubmissionsController < ApplicationController
+  # We won't enforce same-origin when checking authenticity
+  self.forgery_protection_origin_check = false
+
+  # Don't render layout if the request is XHR
+  layout proc { false if request.xhr? }
+
   before_action :set_submission, only: [:show, :edit, :update, :destroy]
   before_action :new_submission, only: [:new, :index, :create]
   before_action :all_submissions, only: [:new, :index, :create]
@@ -83,5 +89,22 @@ class SubmissionsController < ApplicationController
 
     def all_submissions
       @submissions = Submission.all
+    end
+
+    # This overrides a method found in
+    # lib/action_controller/metal/request_forgery_protection.rb
+    #
+    # The method I'm overriding would not strip off the hostname and protocol
+    # portion of the action_path, and when making my first request to the
+    # remote server, the protocol and hostname would be part of the path but
+    # then submitting the form back to the remote server would not include
+    # the hostname and protocol and so the authenticity tokens would
+    # appear different.
+    #
+    # I can't tell if this is a feature or a bug since I'm clearly trying to
+    # do things via CORS that should not be done
+    def normalize_action_path(action_path)
+      logger.debug URI.parse(action_path).inspect
+      URI.parse(action_path).path.to_s.chomp('/')
     end
 end

@@ -1,4 +1,5 @@
-<%= form_for(submission, remote: true) do |f| %>
+<!-- I had to modify the URL for the form so it points to submission_url rather than submisttion_path in order to send submissions back to the second server -->
+<%= form_for(submission, url: submission.new_record? ? submissions_url(submission) : submission_url(submission), remote: true) do |f| %>
   <% if submission.errors.any? %>
     <div id="error_explanation">
       <h2><%= pluralize(submission.errors.count, "error") %> prohibited this submission from being saved:</h2>
